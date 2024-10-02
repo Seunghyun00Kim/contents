@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Random YouTube Playlist with Swipe to Navigate and Mute Button</title>
+    <title>Random YouTube Playlist</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Material+Icons+Outlined');
-
+        
         * {
             margin: 0;
             padding: 0;
@@ -14,7 +14,7 @@
 
         body, html {
             height: 120%;
-            overflow: hidden; /* 스크롤 막기 */
+            overflow: hidden;
         }
 
         .container {
@@ -22,10 +22,8 @@
             width: 100%;
             margin: 0 auto;
             position: relative;
-            height: 100vh; /* 전체 화면 높이를 차지하도록 설정 */
-            overflow: hidden; /* 스크롤 막기 */
-            touch-action: none; /* 터치로 인한 스크롤 막기 */
-            pointer-events: none; /* 전체 화면에서 터치와 클릭 막기 */
+            height: 100vh;
+            overflow: hidden;
         }
 
         .shorts-container {
@@ -41,400 +39,48 @@
             left: 0;
             top: 0;
             z-index: 1;
-            pointer-events: none; /* 터치 막기 */
+            pointer-events: auto; /* Iframe 터치 가능하게 설정 */
         }
 
-        #overlay {
-            position: absolute;
-            top: -20px;
-            left: 0;
-            width: 100%;
-            height: 120%;
-            background-color: rgba(0, 0, 0, 0.7);
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-size: 24px;
-            text-align: center;
-        }
-
-        .arrow-icon {
-            font-size: 48px;
-            margin: 20px 0;
-        }
-
-        #startText {
-            font-size: 20px;
-        }
-
-        .ui-buttons {
-            position: absolute;
-            right: 20px;
-            bottom: 300px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            z-index: 10;
-        }
-
-        .ui-buttons button {
-            background: none;
-            border: none;
-            cursor: pointer;
-            margin: 20px 0;
-            color: white;
-            font-size: 32px;
-            font-family: 'Material Icons Outlined';
-            width: 60px;
-            height: 60px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .ui-buttons button.active.like {
-            color: blue;
-        }
-
-        .ui-buttons button.active.dislike {
-            color: red;
-        }
-
-        #pausePlayButton {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
-            cursor: pointer;
-            z-index: 5;
-            background-color: rgba(0, 0, 0, 0); /* 투명 */
-        }
-
-        #muteButton {
-            position: absolute;
-            top: 70px;
-            right: 20px;
-            width: 100px;
-            height: 40px;
-            border: none;
-            cursor: pointer;
-            z-index: 10;
-            background-color: rgba(0, 0, 0, 0.5);
-            border-radius: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #ffffff;
-            font-size: 14px;
-        }
-
-        #muteicon, #unmuteicon {
-            font-size: 20px;
-            margin-right: 5px;
-        }
-
-        #muteButton span {
-            font-size: 14px;
-        }
-
-        #progressBarContainer {
-            position: absolute;
-            top: 0;
-            left: 4%;
-            width: 100%;
-            height: 5px;
-            background-color: rgba(255, 255, 255, 0.3);
-            z-index: 10;
-        }
-
-        #progressBar {
-            width: 0%;
-            height: 90%;
-            background-color: #0088FF;
-        }
+        /* 다른 스타일 생략 */
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div id="overlay" onclick="hideOverlay()">
-        <i class="material-icons-outlined arrow-icon">arrow_upward</i>
-        위아래로 스와이프하세요
-        <i class="material-icons-outlined arrow-icon">arrow_downward</i>
-        <br>
-        <span id="startText">터치하여 시작하세요</span>
-    </div>
-
     <div class="shorts-container">
-        <iframe id="youtube-iframe" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-    </div>
-
-    <!-- 재생 진행 바 -->
-    <div id="progressBarContainer">
-        <div id="progressBar"></div>
-    </div>
-
-    <!-- 투명한 일시정지/재생 버튼 -->
-    <button id="pausePlayButton"></button>
-
-    <!-- Mute/Unmute 버튼 -->
-    <div id="muteButton">
-        <i id="muteicon" class="material-icons-outlined icon" style="display: inline-block;">volume_off</i>
-        <i id="unmuteicon" class="material-icons-outlined icon" style="display: none;">volume_up</i>
-        <span id="muteText">소리 켜기</span>
-    </div>
-
-    <!-- UI 버튼들 -->
-    <div class="ui-buttons">
-        <!-- 좋아요 버튼 주석처리 -->
-        <!-- <button id="likeButton" class="like">thumb_up</button> -->
-
-        <!-- 싫어요 버튼 주석처리 -->
-        <!-- <button id="dislikeButton" class="dislike">thumb_down</button> -->
+        <iframe id="youtube-iframe" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
     </div>
 </div>
 
+<script src="https://www.youtube.com/iframe_api"></script>
 <script>
-    var playlists = [
-        'PLOF1R5ilnXkilMCC7p4x6ZHoKtsaMaGMV&si=w2kppA1pJD4T4Rwp',
-        'PLOF1R5ilnXkhKUlxjicm76Hhzka3Ih96u&si=i-KqCuaDpSMurjou',
-        'PLOF1R5ilnXkhRJ9l_wDLWEhU-m9KAlkIm&si=sWpv2HNZsBRTHx7j',
-        'PLOF1R5ilnXki6nqtkpF986xdf8ET7JQbL&si=te_bNKlEDBE-yOam',
-        'PLOF1R5ilnXkjOoPPWslfmwf0142nlBgHF&si=r0xvkrzoe8TYe2br',
-        'PLOF1R5ilnXkiKKbZArlbgQ01aPpwBqTq5&si=0ggEarxnE1wvhp1F',
-        'PLOF1R5ilnXki6y-vls9pHQc0OGe_3mTSX&si=sQyYw36P5KmZvjf1',
-        'PLOF1R5ilnXkifCuvyh8Io_qyi5zaXWEdw&si=RByefoJWO_fXLjW3',
-        'PLOF1R5ilnXkgfFdAnLCk5tOpQ2QMA7_Ux&si=hyYhjIzZ_dL_5KG4'
-    ];
+  var playlists = [
+    'PLOF1R5ilnXkilMCC7p4x6ZHoKtsaMaGMV',
+    'PLOF1R5ilnXki6nqtkpF986xdf8ET7JQbL'
+  ];
+  
+  var randomIndex = Math.floor(Math.random() * playlists.length);
+  var selectedPlaylist = playlists[randomIndex];
+  
+  var player;
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player('youtube-iframe', {
+      videoId: selectedPlaylist,
+      playerVars: {
+        'playlist': selectedPlaylist,
+        'autoplay': 1,
+        'mute': 1
+      },
+      events: {
+        'onReady': onPlayerReady
+      }
+    });
+  }
 
-    var remainingIndexes = JSON.parse(localStorage.getItem('remainingIndexes'));
-
-    if (!remainingIndexes || remainingIndexes.length === 0) {
-        remainingIndexes = Array.from(Array(playlists.length).keys());
-    }
-
-    var randomIndex = Math.floor(Math.random() * remainingIndexes.length);
-    var selectedPlaylistIndex = remainingIndexes[randomIndex];
-    var selectedPlaylist = playlists[selectedPlaylistIndex];
-
-    remainingIndexes.splice(randomIndex, 1);
-    localStorage.setItem('remainingIndexes', JSON.stringify(remainingIndexes));
-
-    // 선택된 플레이리스트를 iframe의 src에 설정
-    var iframe = document.getElementById('youtube-iframe');
-    iframe.src = `https://www.youtube.com/embed/videoseries?list=${selectedPlaylist}&autoplay=1&mute=1&enablejsapi=1`;
-
-    // YouTube API를 사용하여 플레이어 제어
-    var player;
-    function onYouTubeIframeAPIReady() {
-        player = new YT.Player('youtube-iframe', {
-            events: {
-                'onReady': onPlayerReady,
-                'onStateChange': onPlayerStateChange
-            }
-        });
-    }
-
-    function onPlayerReady(event) {
-        player.mute(); // 처음 시작할 때 음소거 상태로 설정
-        updateProgressBar(); // 진행 바 업데이트 시작전체 화면에서 터치 이벤트를 막는 완성된 코드는 아래와 같습니다. 이 코드는 `pointer-events: none;`을 사용하여 화면의 모든 터치와 클릭 이벤트를 비활성화합니다.
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Random YouTube Playlist with Swipe to Navigate and Mute Button</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Material+Icons+Outlined');
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body, html {
-            height: 120%;
-            overflow: hidden; /* 스크롤 막기 */
-            pointer-events: none; /* 터치 이벤트 막기 */
-        }
-
-        .container {
-            max-width: 600px;
-            width: 100%;
-            margin: 0 auto;
-            position: relative;
-            height: 100vh; /* 전체 화면 높이를 차지하도록 설정 */
-            overflow: hidden; /* 스크롤 막기 */
-            touch-action: none; /* 터치로 인한 스크롤 막기 */
-            pointer-events: none; /* 전체 화면에서 터치와 클릭 막기 */
-        }
-
-        .shorts-container {
-            position: relative;
-            width: 100%;
-            height: 120%;
-        }
-
-        .shorts-container iframe {
-            position: absolute;
-            width: 100%;
-            height: 120%;
-            left: 0;
-            top: 0;
-            z-index: 1;
-            pointer-events: none; /* 터치 막기 */
-        }
-
-        #overlay {
-            position: absolute;
-            top: -20px;
-            left: 0;
-            width: 100%;
-            height: 120%;
-            background-color: rgba(0, 0, 0, 0.7);
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-size: 24px;
-            text-align: center;
-        }
-
-        .arrow-icon {
-            font-size: 48px;
-            margin: 20px 0;
-        }
-
-        #startText {
-            font-size: 20px;
-        }
-
-        .ui-buttons {
-            position: absolute;
-            right: 20px;
-            bottom: 300px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            z-index: 10;
-        }
-
-        .ui-buttons button {
-            background: none;
-            border: none;
-            cursor: pointer;
-            margin: 20px 0;
-            color: white;
-            font-size: 32px;
-            font-family: 'Material Icons Outlined';
-            width: 60px;
-            height: 60px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        #pausePlayButton {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
-            cursor: pointer;
-            z-index: 5;
-            background-color: rgba(0, 0, 0, 0); /* 투명 */
-        }
-
-        #muteButton {
-            position: absolute;
-            top: 70px;
-            right: 20px;
-            width: 100px;
-            height: 40px;
-            border: none;
-            cursor: pointer;
-            z-index: 10;
-            background-color: rgba(0, 0, 0, 0.5);
-            border-radius: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #ffffff;
-            font-size: 14px;
-        }
-
-        #muteicon, #unmuteicon {
-            font-size: 20px;
-            margin-right: 5px;
-        }
-
-        #muteButton span {
-            font-size: 14px;
-        }
-
-        #progressBarContainer {
-            position: absolute;
-            top: 0;
-            left: 4%;
-            width: 100%;
-            height: 5px;
-            background-color: rgba(255, 255, 255, 0.3);
-            z-index: 10;
-        }
-
-        #progressBar {
-            width: 0%;
-            height: 90%;
-            background-color: #0088FF;
-        }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <div id="overlay" onclick="hideOverlay()">
-        <i class="material-icons-outlined arrow-icon">arrow_upward</i>
-        위아래로 스와이프하세요
-        <i class="material-icons-outlined arrow-icon">arrow_downward</i>
-        <br>
-        <span id="startText">터치하여 시작하세요</span>
-    </div>
-
-    <div class="shorts-container">
-        <iframe id="youtube-iframe" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-    </div>
-
-    <!-- 재생 진행 바 -->
-    <div id="progressBarContainer">
-        <div id="progressBar"></div>
-    </div>
-
-    <!-- 투명한 일시정지/재생 버튼 -->
-    <button id="pausePlayButton"></button>
-
-    <!-- Mute/Unmute 버튼 -->
-    <div id="muteButton">
-        <i id="muteicon" class="material-icons-outlined icon" style="display: inline-block;">volume_off</i>
-        <i id="unmuteicon" class="material-icons-outlined icon" style="display: none;">volume_up</i>
-        <span id="muteText">소리 켜기</span>
-    </div>
-
-    <!-- UI 버튼들 -->
-    <div class="ui-buttons"></div>
-</div>
-
-<script>
-    // YouTube IFrame API 추가 및 재생 리스트 설정 (이전 코드 유지)
+  function onPlayerReady(event) {
+    event.target.playVideo();
+  }
 </script>
 
 </body>
