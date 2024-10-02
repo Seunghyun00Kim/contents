@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Random YouTube Playlist with Swipe to Navigate and Mute Button</title>
+    <title>Random YouTube Playlist</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Material+Icons+Outlined');
 
@@ -41,33 +41,6 @@
             top: 0;
             z-index: 1;
             pointer-events: none;
-        }
-
-        /* 처음에 보여줄 오버레이 화면 */
-        #overlay {
-            position: absolute;
-            top: -20px; /* 화면을 위로 살짝 이동 */
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7); /* 투명도를 더 높임 */
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-size: 24px;
-            text-align: center;
-        }
-
-        .arrow-icon {
-            font-size: 48px;
-            margin: 20px 0;
-        }
-
-        #startText {
-            font-size: 20px; /* 터치하여 시작하세요의 글자 크기를 줄임 */
         }
 
         /* UI 버튼 컨테이너 */
@@ -153,14 +126,6 @@
 <body>
 
 <div class="container">
-    <div id="overlay" onclick="hideOverlay()">
-        <i class="material-icons-outlined arrow-icon">arrow_upward</i>
-        위아래로 스와이프하세요
-        <i class="material-icons-outlined arrow-icon">arrow_downward</i>
-        <br>
-        <span id="startText">터치하여 시작하세요</span>
-    </div>
-
     <div class="shorts-container">
         <iframe id="youtube-iframe" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
     </div>
@@ -169,9 +134,6 @@
     <div id="progressBarContainer">
         <div id="progressBar"></div>
     </div>
-
-    <!-- 투명한 일시정지/재생 버튼 -->
-    <button id="pausePlayButton"></button>
 
     <!-- Mute/Unmute 버튼 -->
     <div id="muteButton">
@@ -252,72 +214,5 @@
     }
 
     function updateProgressBar() {
-        var duration = player.getDuration();
-        var currentTime = player.getCurrentTime();
-        var progressPercent = (currentTime / duration) * 100;
-        
-        document.getElementById('progressBar').style.width = progressPercent + '%';
-
-        if (player.getPlayerState() === YT.PlayerState.PLAYING) {
-            requestAnimationFrame(updateProgressBar);
-        }
-    }
-
-    // 오버레이 숨기기
-    function hideOverlay() {
-        document.getElementById('overlay').style.display = 'none';
-    }
-
-    // 스와이프 감지
-    var startY;
-
-    document.querySelector('.container').addEventListener('touchstart', function(e) {
-        startY = e.touches[0].clientY;
-    });
-
-    document.querySelector('.container').addEventListener('touchmove', function(e) {
-        if (!startY) return;
-
-        var currentY = e.touches[0].clientY;
-        var diffY = startY - currentY;
-
-        // 일정 거리 이상 스와이프되었을 때만 반응
-        if (Math.abs(diffY) > 50) {
-            e.preventDefault(); // 스크롤 방지
-            if (diffY > 0) {
-                // 아래로 스와이프 -> 다음 영상
-                player.nextVideo();
-            } else {
-                // 위로 스와이프 -> 이전 영상
-                player.previousVideo();
-            }
-            startY = null; // 한번 스와이프한 후엔 초기화
-        }
-    });
-
-    // Mute/Unmute 버튼 제어
-    var isMuted = true; // 기본 상태를 muted로 설정
-    document.getElementById('muteButton').addEventListener('click', function() {
-        if (isMuted) {
-            player.unMute();
-            document.getElementById('muteicon').style.display = "none";
-            document.getElementById('unmuteicon').style.display = "inline-block";
-            document.getElementById('muteText').textContent = "소리 끄기";
-        } else {
-            player.mute();
-            document.getElementById('muteicon').style.display = "inline-block";
-            document.getElementById('unmuteicon').style.display = "none";
-            document.getElementById('muteText').textContent = "소리 켜기";
-        }
-        isMuted = !isMuted;
-    });
-
-    // YouTube IFrame API를 비동기로 로드
-    var tag = document.createElement('script');
-    tag.src = "https://www.youtube.com/iframe_api";
-    var firstScriptTag = document.getElementsByTagName('script')[0];
-    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-</script>
-
-</body>
-</html>
+        var duration = player.getDuration
+    
