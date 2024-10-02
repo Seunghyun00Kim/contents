@@ -43,40 +43,6 @@
             pointer-events: none;
         }
 
-        /* UI 버튼 컨테이너 */
-        .ui-buttons {
-            position: absolute;
-            right: 20px;
-            bottom: 300px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            z-index: 10;
-        }
-
-        .ui-buttons button {
-            background: none;
-            border: none;
-            cursor: pointer;
-            margin: 20px 0;
-            color: white;
-            font-size: 32px;
-            font-family: 'Material Icons Outlined';
-            width: 60px;
-            height: 60px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .ui-buttons button.active.like {
-            color: blue; /* 좋아요 버튼이 활성화되었을 때 색상 */
-        }
-
-        .ui-buttons button.active.dislike {
-            color: red; /* 싫어요 버튼이 활성화되었을 때 색상 */
-        }
-
         /* 음소거 버튼 위치와 디자인 */
         #muteButton {
             position: absolute;
@@ -143,13 +109,7 @@
     </div>
 
     <!-- UI 버튼들 -->
-    <div class="ui-buttons">
-        <!-- 좋아요 버튼 주석처리 -->
-        <!-- <button id="likeButton" class="like">thumb_up</button> -->
-
-        <!-- 싫어요 버튼 주석처리 -->
-        <!-- <button id="dislikeButton" class="dislike">thumb_down</button> -->
-    </div>
+    <div class="ui-buttons"></div>
 </div>
 
 <script>
@@ -214,5 +174,41 @@
     }
 
     function updateProgressBar() {
-        var duration = player.getDuration
-    
+        var duration = player.getDuration();
+        var currentTime = player.getCurrentTime();
+        var progressPercent = (currentTime / duration) * 100;
+        
+        document.getElementById('progressBar').style.width = progressPercent + '%';
+
+        if (player.getPlayerState() === YT.PlayerState.PLAYING) {
+            requestAnimationFrame(updateProgressBar);
+        }
+    }
+
+    // Mute/Unmute 버튼 제어
+    var isMuted = true; // 기본 상태를 muted로 설정
+    document.getElementById('muteButton').addEventListener('click', function() {
+        if (isMuted) {
+            player.unMute();
+            document.getElementById('muteicon').style.display = "none";
+            document.getElementById('unmuteicon').style.display = "inline-block";
+            document.getElementById('muteText').textContent = "소리 끄기";
+        } else {
+            player.mute();
+            document.getElementById('muteicon').style.display = "inline-block";
+            document.getElementById('unmuteicon').style.display = "none";
+            document.getElementById('muteText').textContent = "소리 켜기";
+        }
+        isMuted = !isMuted;
+    });
+
+    // YouTube IFrame API를 비동기로 로드
+    var tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    var firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+</script>
+
+</body>
+</html>
+
